@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>kartu hari ini</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff; --ink:#2a2347; --soft:#6f6692; --line:#cfc4ee; --back:#e9e1fb; --front:#f6f2ff;
+  --glow:#b99cff; --gold:#c98a2b;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#191919; --ink:#ece8f6; --soft:#9b93b8; --line:#3b3360; --back:#241d44; --front:#1f1a3a;
+    --glow:#8b6bff; --gold:#f3c98b;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#191919; --ink:#ece8f6; --soft:#9b93b8; --line:#3b3360; --back:#241d44; --front:#1f1a3a;
+  --glow:#8b6bff; --gold:#f3c98b;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  display:flex;align-items:center;justify-content:center;padding:28px 20px;overflow-x:hidden}
+.wrap{width:100%;max-width:720px;display:flex;align-items:center;gap:44px}
+.card{flex:none;width:190px;aspect-ratio:2/3;perspective:1100px;background:none;border:0;padding:0;cursor:pointer;color:inherit;font:inherit}
+.card:focus-visible{outline:3px solid var(--glow);outline-offset:6px;border-radius:16px}
+.inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+.card.on .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:14px;border:1.5px solid var(--line);backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
+.back{background:var(--back);box-shadow:0 0 36px -6px var(--glow)}
+.back svg{width:100%;height:100%;display:block}
+.front{background:var(--front);transform:rotateY(180deg);display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:8px;text-align:center;padding:20px 14px 18px}
+.front::before{content:"";position:absolute;inset:8px;border:1px solid var(--line);border-radius:9px}
+.front::after{content:"";position:absolute;left:50%;top:42%;width:150%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle,var(--glow) 0%,transparent 60%);opacity:.28}
+.num,.name{position:relative;z-index:1}
+.num{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-size:24px;line-height:1;color:var(--gold)}
+.art{position:relative;z-index:1;width:80%;flex:1;display:flex;align-items:center;min-height:0}
+.art svg{width:100%;height:auto;max-height:100%}
+.art .a{fill:var(--glow);fill-opacity:.4}
+.name{font-family:"Instrument Serif",Georgia,serif;font-size:20px;line-height:1.15}
+.read{flex:1;min-width:0;min-height:260px;display:flex;flex-direction:column;justify-content:center;gap:18px}
+.hint{margin:0;font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-size:26px;color:var(--soft)}
+.date{margin:0;font-size:14px;color:var(--soft)}
+.reveal{display:none;flex-direction:column;gap:18px}
+.on ~ .read .hint,.read.on .hint{display:none}
+.read.on .reveal{display:flex;animation:in .7s ease both .5s}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.pesan{margin:0;font-family:"Instrument Serif",Georgia,serif;font-size:clamp(22px,3.4vw,29px);line-height:1.3}
+.ide{margin:0;padding-top:14px;border-top:1px solid var(--line);font-size:15px;line-height:1.55;color:var(--soft)}
+.ide b{font-weight:500;color:var(--gold)}
+@media (max-width:560px){
+  .wrap{flex-direction:column;gap:28px}
+  .read{min-height:0;text-align:left;width:100%}
+}
+@media (prefers-reduced-motion:reduce){.inner{transition:none}.read.on .reveal{animation:none}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <button class="card" id="card" type="button" aria-pressed="false" aria-label="Buka kartu hari ini">
+    <div class="inner">
+      <div class="face back">
+        <svg viewBox="0 0 100 150" aria-hidden="true">
+          <g fill="none" stroke="var(--line)" stroke-width=".8">
+            <circle cx="50" cy="75" r="12"/><circle cx="50" cy="75" r="24"/><circle cx="50" cy="75" r="36"/>
+            <path d="M50 30v90M5 75h90M18 43l64 64M82 43L18 107"/>
+          </g>
+          <path d="M50 64l3.5 8.5 8.5 3.5-8.5 3.5L50 88l-3.5-8.5L38 76l8.5-3.5z" fill="var(--gold)"/>
+        </svg>
+      </div>
+      <div class="face front"><div class="num" id="num"></div><div class="art" id="art"></div><div class="name" id="name"></div></div>
+    </div>
+  </button>
+  <section class="read" id="read" aria-live="polite">
+    <p class="hint">ketuk kartunya</p>
+    <div class="reveal">
+      <p class="date" id="date"></p>
+      <p class="pesan" id="pesan"></p>
+      <p class="ide"><b>ide</b>&ensp;<span id="ide"></span></p>
+    </div>
+  </section>
+</main>
+<script>
+(function(){
+  var C=[
+    ["0","The Fool","Setiap hari adalah peluang baru untuk menyelami hidup dengan rasa takjub, penasaran, dan keberanian melangkah tanpa takut.","Cerita yang bermula dari satu langkah nekat, tanpa peta dan tanpa rencana pulang."],
+    ["I","The Magician","Sadarlah betapa berkuasanya dirimu; benahi dulu dunia di dalam dada, maka dunia luar akan mengikutinya.","Seseorang baru sadar bahwa kekuatan yang dicarinya selama ini sudah ada di tangannya sendiri."],
+    ["II","The High Priestess","Terkadang, kamu hanya perlu diam dan mendengar bisikan intuisimu, alih-alih terus-terusan memakai logika.","Sesuatu yang tak bisa dijelaskan logika, tapi terasa begitu pasti di dalam dada."],
+    ["III","The Empress","Hidup ini tentang merawat, mencipta, dan membiarkan sisi kreatifmu tumbuh subur dengan penuh kelembutan.","Adegan sunyi tentang merawat sesuatu pelan-pelan, entah tanaman, rumah, atau seseorang, sampai ia tumbuh."],
+    ["IV","The Emperor","Keteraturan, aturan, dan bimbingan yang tepat adalah fondasi kokoh untuk membangun arah hidup yang jelas.","Seseorang yang menjaga semuanya tetap teratur, sampai datang satu hal yang tak bisa lagi diatur."],
+    ["V","The Hierophant","Tak ada salahnya berpijak pada tradisi dan jalur yang sudah teruji untuk menemukan ketenangan.","Aturan lama yang diwariskan turun-temurun, dan satu orang yang mulai mempertanyakannya."],
+    ["VI","The Lovers","Cinta dan kesatuan yang tulus memberi kita sayap untuk saling menguatkan dan percaya diri.","Dua orang di persimpangan yang harus memilih jujur, padahal memilih aman jauh lebih mudah."],
+    ["VII","The Chariot","Fokus dan jalankan rencanamu dengan kepala dingin serta langkah yang tertata rapi.","Perjalanan yang ditempuh dengan tekad penuh, sementara ragu ikut duduk di kursi sebelah."],
+    ["VIII","Strength","Ketahanan mental adalah perisaimu, dan ketulusan hati membuatmu tak pernah gentar menyuarakan kebenaran.","Meredakan sesuatu yang liar, entah amarah, ketakutan, atau makhluk, dengan kelembutan dan bukan paksaan."],
+    ["IX","The Hermit","Menyelami gelapnya isi kepala sendiri, ditemani cahaya kecil yang menuntunmu pulang ke jati diri.","Menyepi jauh dari keramaian demi mencari jawaban, lalu ada seseorang yang diam-diam menyusul."],
+    ["X","The Wheel of Fortune","Sama seperti musim yang berganti, roda nasib akan berputar membawa bagiannya masing-masing.","Nasib berbalik dalam semalam: yang di puncak turun, yang terpuruk naik."],
+    ["XI","Justice","Keadilan akan melegakan mereka yang terluka, sekaligus memperingatkan mereka yang sengaja melukai.","Perbuatan lama akhirnya menagih hasilnya, dan tak ada yang bisa menawar."],
+    ["XII","The Hanged Man","Belajarlah berhenti sejenak. Kadang, tidak mengambil tindakan apa pun adalah keputusan paling bijak.","Terjebak menunggu dan terpaksa diam, lalu dunia tampak berbeda sekali dari sudut itu."],
+    ["XIII","Death","Sebuah babak harus rela ditutup, supaya lembaran baru yang lebih luas bisa terbuka.","Satu hal yang harus ditinggalkan selamanya agar hidup bisa mulai lagi dari awal."],
+    ["XIV","Temperance","Segala sesuatu yang berlebihan itu rapuh; kuncinya ada pada keseimbangan dan kesabaran yang sabar merawat waktu.","Dua hal yang bertolak belakang belajar saling meracik, pelan-pelan, takaran demi takaran."],
+    ["XV","The Devil","Rasa terbelenggu sering kali bukan karena orang lain, tapi karena kita sendiri yang terlalu lekat menggenggam kesenangan semu.","Rantai yang sebenarnya longgar, dan seseorang yang belum sadar bahwa ia bisa pergi kapan saja."],
+    ["XVI","The Tower","Saat segalanya runtuh berkeping-keping, itu tanda cara lama sudah usang dan kamu butuh keyakinan baru.","Rahasia yang lama disembunyikan pecah tepat saat semuanya tampak baik-baik saja."],
+    ["XVII","The Star","Percayalah pada semesta; di saat paling gelap sekalipun, selalu ada cahaya yang disiapkan untukmu.","Malam tenang setelah badai, ketika harapan datang lagi dalam bentuknya yang paling kecil."],
+    ["XVIII","The Moon","Jangan takut pada gelapnya malam, biarkan intuisimu menjadi terang yang menuntun langkahmu.","Sesuatu yang tampak jelas ternyata hanya bayangan, dan kebenarannya baru kelihatan saat fajar."],
+    ["XIX","The Sun","Berbanggalah, karena kamu memang layak berjalan dengan kepala tegak dan senyum penuh keyakinan.","Adegan hangat tanpa beban, dengan tawa yang pecah tanpa alasan apa-apa."],
+    ["XX","Judgement","Kesadaran baru sedang mengetuk pintu jiwamu, lahir dari jujurnya proses perenungan diri.","Masa lalu mengetuk pintu dan menuntut jawaban: diterima, atau dilepas."],
+    ["XXI","The World","Pada akhirnya, segala lelah perjalanan ini bermuara pada rasa utuh, damai, dan genapnya dirimu.","Menoleh ke belakang pada seluruh perjalanan, lalu sadar sudah sejauh dan seutuh ini."]
+  ];
+  var ART=[
+    "<circle class='a' cx='72' cy='24' r='10'/><path d='M72 6v4M72 38v4M54 24h4M86 24h4M60 12l3 3M81 33l3 3M84 12l-3 3M63 33l-3 3'/><path d='M8 78h44l8 10'/><circle cx='54' cy='62' r='5'/><path d='M54 67v8M54 70l-7 4M54 70l7-4'/>",
+    "<path d='M50 36c-8-10-26-10-26 0s18 10 26 0s18-10 26 0s-18 10-26 0z'/><path d='M50 44v36M22 84h56'/><circle class='a' cx='50' cy='20' r='5'/>",
+    "<rect x='16' y='22' width='10' height='58' rx='2'/><rect x='74' y='22' width='10' height='58' rx='2'/><path class='a' d='M56 32a20 20 0 1 0 0 36a15 15 0 1 1 0-36z'/>",
+    "<circle cx='50' cy='38' r='16'/><circle class='a' cx='50' cy='38' r='8'/><path d='M50 54v28M38 70h24'/>",
+    "<path d='M28 82V30h44v52'/><path d='M28 30l7-12 7 9 8-13 8 13 7-9 7 12'/><circle class='a' cx='50' cy='58' r='10'/>",
+    "<path d='M50 12v76M36 28h28M30 42h40M24 56h52'/><circle class='a' cx='50' cy='80' r='4'/>",
+    "<circle cx='40' cy='56' r='22'/><circle cx='60' cy='56' r='22'/><path class='a' d='M50 14l4 8 9 1-6 6 2 9-9-5-9 5 2-9-6-6 9-1z'/>",
+    "<path d='M20 38a30 26 0 0 1 60 0z'/><circle cx='50' cy='64' r='20'/><circle class='a' cx='50' cy='64' r='6'/><path d='M50 44v40M30 64h40M36 50l28 28M64 50L36 78'/>",
+    "<path d='M50 26c-6-8-20-8-20 0s14 8 20 0s14-8 20 0s-14 8-20 0z'/><path class='a' d='M26 84c0-30 12-44 24-44s24 14 24 44z'/>",
+    "<path d='M42 38a8 8 0 0 1 16 0'/><rect x='38' y='38' width='24' height='38' rx='3'/><circle class='a' cx='50' cy='57' r='8'/><path d='M22 20v64M14 84h72'/>",
+    "<circle cx='50' cy='50' r='32'/><circle cx='50' cy='50' r='10'/><circle class='a' cx='50' cy='50' r='4'/><path d='M50 18v22M50 60v22M18 50h22M60 50h22M27 27l16 16M57 57l16 16M73 27L57 43M43 57L27 73'/>",
+    "<path d='M50 14v70M28 84h44M22 30h56'/><path d='M22 30l-10 26h20zM78 30l-10 26h20z'/><path class='a' d='M12 56a10 8 0 0 0 20 0zM68 56a10 8 0 0 0 20 0z'/>",
+    "<path d='M20 16h60M30 16v4M70 16v4M50 16v26M50 42v20M38 56l12 6l12-6'/><circle cx='50' cy='70' r='7'/><circle class='a' cx='50' cy='70' r='12'/>",
+    "<circle class='a' cx='50' cy='50' r='7'/><ellipse cx='50' cy='32' rx='8' ry='14'/><ellipse cx='50' cy='32' rx='8' ry='14' transform='rotate(72 50 50)'/><ellipse cx='50' cy='32' rx='8' ry='14' transform='rotate(144 50 50)'/><ellipse cx='50' cy='32' rx='8' ry='14' transform='rotate(216 50 50)'/><ellipse cx='50' cy='32' rx='8' ry='14' transform='rotate(288 50 50)'/>",
+    "<path d='M18 22h20l-3 14H21zM28 36v14M20 50h16'/><path d='M62 52h20l-3 14H65zM72 66v14M64 80h16'/><path d='M38 30c18-4 26 6 30 20' stroke-dasharray='2 5'/>",
+    "<circle cx='50' cy='50' r='32'/><path d='M50 76L34.7 29L74.7 58L25.3 58L65.3 29z'/><circle class='a' cx='50' cy='50' r='5'/>",
+    "<path d='M38 82V38h24v44M34 38h32l-4-10H38z'/><circle class='a' cx='50' cy='56' r='5'/><path d='M76 8L62 32h10L58 56M18 70l6 4M24 52l6 4M80 74l-6 4'/>",
+    "<path d='M50 14v72M14 50h72M25 25l50 50M75 25L25 75'/><circle class='a' cx='50' cy='50' r='9'/><circle cx='20' cy='22' r='2.5'/><circle cx='80' cy='80' r='2.5'/><circle cx='82' cy='20' r='2'/>",
+    "<path class='a' d='M62 18a32 32 0 1 0 0 64a25 25 0 1 1 0-64z'/><circle cx='78' cy='34' r='2.5'/><circle cx='82' cy='56' r='2'/><circle cx='72' cy='72' r='3'/>",
+    "<circle class='a' cx='50' cy='50' r='14'/><path d='M68 50h12M65.6 59L76 65M59 65.6L65 76M50 68v12M41 65.6L35 76M34.4 59L24 65M32 50H20M34.4 41L24 35M41 34.4L35 24M50 32V20M59 34.4L65 24M65.6 41L76 35'/>",
+    "<path d='M18 58l40-16v32z'/><path class='a' d='M18 58l-6-4v12z'/><path d='M66 46a16 16 0 0 1 0 24M74 38a28 28 0 0 1 0 40M82 30a40 40 0 0 1 0 56'/>",
+    "<ellipse cx='50' cy='50' rx='26' ry='34'/><ellipse cx='50' cy='50' rx='18' ry='26' stroke-dasharray='3 4'/><path class='a' d='M50 36l8 14-8 14-8-14z'/><circle cx='16' cy='16' r='3'/><circle cx='84' cy='16' r='3'/><circle cx='16' cy='84' r='3'/><circle cx='84' cy='84' r='3'/>"
+  ];
+  var CUP="<path d='M30 34h40c0 20-8 30-20 32-12-2-20-12-20-32z'/><path d='M50 66v14M36 84h28'/><path class='a' d='M30 34h40c0 8-1 12-3 16H33c-2-4-3-8-3-16z'/>";
+  var WAND="<path d='M50 88V34'/><path class='a' d='M50 34c-10-2-14-10-12-18 8 2 12 8 12 18zM50 34c10-2 14-10 12-18-8 2-12 8-12 18zM50 48c-8 0-12-6-12-12 6 0 10 4 12 12z'/>";
+  var SWORD="<path class='a' d='M50 10l6 12v48H44V22z'/><path d='M36 70h28M50 70v14'/>";
+  var PENT="<circle cx='50' cy='56' r='28'/><path d='M50 36L61.8 72.2L31 49.8L69 49.8L38.2 72.2z'/><circle class='a' cx='50' cy='56' r='6'/>";
+  var CROWN="<path d='M36 20l-2-12 9 6 7-9 7 9 9-6-2 12z'/>";
+  var SUITS=[["Cups","cawan",CUP],["Wands","tongkat",WAND],["Swords","pedang",SWORD],["Pentacles","koin",PENT]];
+  var RANKS=["Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Page","Knight","Queen","King"];
+  var M=[
+   [["Pelepasan emosional yang tulus selalu membawa kelegaan dan kejernihan baru di dalam batin.","Tangis yang akhirnya pecah setelah lama ditahan, dan kelegaan yang datang sesudahnya."],
+    ["Keindahan sejati lahir saat dua jiwa menyatu dalam keharmonisan dan rasa saling memiliki.","Dua orang yang baru sadar sudah lama saling menjaga tanpa pernah mengatakannya."],
+    ["Luangkan waktu sejenak untuk merayakan hidup bersama orang-orang yang paling kamu sayangi.","Pesta kecil di tengah hari-hari berat, dengan tawa yang terasa seperti pulang."],
+    ["Ada kalanya dunia terasa hampa, di mana hal baik atau buruk sekalipun kehilangan maknanya di matamu.","Hari ketika semuanya terasa datar, bahkan kabar baik pun lewat begitu saja."],
+    ["Terus-menerus menatap penyesalan masa lalu hanya akan membuatmu lelah merawat rasa sakit yang sama.","Berdiri lama menatap yang sudah tumpah, tanpa sadar masih ada yang tersisa di belakang."],
+    ["Pulanglah pada kehangatan dan rasa aman yang diberikan oleh mereka yang mencintaimu tanpa syarat.","Kembali ke rumah masa kecil dan menemukan kehangatan yang masih utuh di sana."],
+    ["Belajarlah membedakan mana realitas dan ilusi sebelum hatimu tersesat dalam angan-angan.","Banyak pilihan berkilau di hadapan, padahal hanya satu yang nyata dan sisanya bayangan."],
+    ["Keberanian terbesar adalah ketika kamu sadar harus melangkah pergi dari hal familiar demi menemukan diri yang baru.","Pergi diam-diam di tengah malam dari tempat yang terlalu lama dikenal, demi sesuatu yang belum bernama."],
+    ["Kepuasan dan kebahagiaan yang mendalam terkadang bisa ditemukan saat kamu nyaman dengan diri sendiri.","Seseorang yang akhirnya merasa cukup dengan dirinya sendiri, duduk tenang tanpa perlu dilihat siapa pun."],
+    ["Kebahagiaan sejati baru terasa sempurna ketika ia dibagikan untuk membangun rasa kekeluargaan yang hangat.","Meja panjang yang penuh keluarga dan tawa, dan bahagia yang terasa lengkap karena dibagi."],
+    ["Ketekunan adalah jembatan sunyi yang mengubah setiap impian mustahil menjadi kenyataan.","Mimpi yang tampak mustahil, dan seseorang yang menekuninya diam-diam sampai menjadi nyata."],
+    ["Sambutlah setiap utusan dan peluang baik yang datang membawa kedamaian untuk hatimu.","Seorang utusan datang membawa tawaran yang terlalu baik, dan hati yang akhirnya memutuskan menerimanya."],
+    ["Suara hatimu tak pernah berdusta, belajarlah memercayai tuntunannya.","Seseorang yang dikenal tenang memilih mendengarkan hatinya, meski semua orang menyarankan sebaliknya."],
+    ["Keseimbangan hidup tercapai ketika pikiran jernih berjalan seiring dengan kelembutan perasaan.","Tetap tenang di tengah badai, karena perasaan dan pikirannya sudah lama berdamai."]],
+   [["Percayalah pada instingmu; jika sebuah gagasan terasa benar di hati, mulailah melangkah dan wujudkan.","Satu gagasan muncul tiba-tiba di hari biasa, dan seseorang langsung memutuskan mengejarnya."],
+    ["Perencanaan yang matang adalah langkah awal yang pasti untuk menjemput masa depan.","Berdiri di atas menara memandangi peta, menimbang ke mana langkah berikutnya."],
+    ["Kesabaran dalam membangun fondasi hari ini akan menopang ambisimu di esok hari.","Menunggu kapal di tepi tebing, setelah semua fondasi dipasang dengan sabar."],
+    ["Rayakan kebersamaan dengan orang terkasih, biarkan tawa dan kehangatan mengisi ruang-ruang lelahmu.","Perayaan di bawah gapura bunga, setelah lama merasa lelah sendirian."],
+    ["Pandanglah kompetisi sebagai cara sehat untuk bertumbuh tanpa harus menumbuhkan benci.","Adu argumen yang ramai dan berantakan, padahal tak ada yang sungguh ingin menang."],
+    ["Kemenangan yang manis adalah buah dari ketekunan mengasah potensi terbaik dalam dirimu.","Arak-arakan pulang setelah menang, dan sorak yang terasa asing bagi yang terbiasa sendiri."],
+    ["Berdiri teguhlah pada prinsipmu, betapa pun kerasnya dunia mencoba menggoyahkan posisimu.","Berdiri sendirian di atas bukit, menahan kerumunan yang menyerbu dari bawah."],
+    ["Kabar baik dan perubahan positif sering kali datang menghampiri tanpa diduga-duga.","Pesan-pesan yang datang bertubi-tubi dan mengubah segalanya dalam satu hari."],
+    ["Seseorang yang tangguh bukan yang tak pernah terluka, melainkan yang menolak menyerah setelah jatuh berkali-kali.","Luka di mana-mana tapi masih berdiri, menjaga satu hal yang tak mau dilepas."],
+    ["Pencapaian besar selalu datang berdampingan dengan beratnya tanggung jawab di pundak.","Memikul beban terlalu banyak, hanya satu langkah lagi dari rumah."],
+    ["Biarkan rasa penasaran membakar semangatmu untuk terus menjelajah dan menemukan hal-hal baru.","Seorang pendatang muda menemukan jejak aneh dan tak bisa berhenti penasaran."],
+    ["Mulailah petualangan kreatifmu dengan semangat dan energi yang tak pernah padam.","Berangkat tanpa memikirkan pulang, dengan satu ide kreatif yang menyala-nyala."],
+    ["Energi positifmu mampu menerangi sekeliling, jadilah sosok tangguh yang berani membela kebenaran.","Seseorang yang berani membela kebenaran, dan hadirnya saja sudah menerangi ruangan."],
+    ["Seorang pemimpin sejati tidak mengandalkan paksaan, melainkan memimpin dengan visi dan karisma yang menginspirasi.","Pemimpin yang tak pernah berteriak, tapi semua mengikuti karena percaya pada visinya."]],
+   [["Sebuah pemahaman baru yang jernih mampu melenyapkan kabut kebingungan dalam sekejap.","Satu kalimat yang tiba-tiba mengurai seluruh kebingungan."],
+    ["Di persimpangan yang sulit, diam sejenak adalah cara terberat untuk memilih tanpa melukai.","Duduk menutup mata dengan dua pedang di pelukan, menolak memilih dulu."],
+    ["Luka batin mengajarkan kita arti ketulusan, menguji apakah kita akan menyerah atau bangkit kembali.","Hujan di atas hati yang tertusuk, dan pilihan antara berhenti di sini atau bangkit."],
+    ["Istirahat bukanlah tanda kelemahan, melainkan jeda yang menyelamatkan akal sehatmu.","Tidur panjang di ruang sunyi, ketika dunia akhirnya boleh menunggu."],
+    ["Kemenangan yang diraih di atas reruntuhan hubungan sebenarnya adalah sebuah kekalahan.","Kemenangan yang membuat semua orang pergi, menyisakan seseorang yang berdiri sendiri."],
+    ["Melepaskan masa lalu memang menyakitkan, tapi itu adalah satu-satunya tiket menuju ketenangan.","Perahu yang membawa pergi dari tepi yang menyakitkan menuju air yang lebih tenang."],
+    ["Jalan pintas dan rahasia kelam pada akhirnya selalu menuntut bayaran yang setimpal.","Mengendap-endap membawa sesuatu yang bukan miliknya, dengan rasa bersalah mengikuti dari belakang."],
+    ["Menyerahkan kendali hidup pada keadaan luar hanya akan membuatmu merasa terkurung oleh sangkar buatan sendiri.","Terikat dan terkurung, padahal pintunya tak pernah dikunci."],
+    ["Kecemasan terbesar sering kali hanya hidup di dalam kepala yang menolak berbagi beban.","Terbangun tengah malam oleh pikiran yang terus membesar, padahal tak ada apa-apa di kamar."],
+    ["Setelah titik nadir dan kejatuhan terberat, satu-satunya arah tersisa hanyalah berusaha untuk bangkit lagi.","Titik terendah yang sudah di sudut, dan matahari terbit tipis di ujung cakrawala."],
+    ["Pikiran yang kritis dan keberanian untuk jujur membuatmu selalu siap menyuarakan ide-ide cemerlang.","Seseorang muda yang tak takut mengatakan apa yang dilihatnya, dengan gagasan setajam pisau."],
+    ["Melaju tanpa kenal takut, menembus segala hambatan demi mengejar apa yang diyakini.","Berpacu melawan angin menuju sesuatu yang diyakini, tanpa menoleh ke belakang."],
+    ["Gunakan logika dan fakta yang objektif untuk melihat kebenaran dengan utuh, bukan sekadar emosi sesaat.","Menimbang fakta dengan tenang, dan melihat apa yang orang lain tak mau lihat."],
+    ["Keputusan yang paling bijak selalu lahir dari kepala dingin, pikiran yang objektif, dan keberanian untuk menegakkan kebenaran.","Keputusan sulit yang diambil dengan kepala dingin, karena kebenaran lebih penting dari kenyamanan."]],
+   [["Benih kecil yang dirawat dengan sabar hari ini akan tumbuh menjadi sumber kestabilan di masa depan.","Sebutir benih di telapak tangan, dan taman yang baru akan tumbuh jika dirawat."],
+    ["Keseimbangan adalah seni bertahan di tengah gelombang kehidupan yang menuntut kita untuk terus beradaptasi.","Menyulap dua hal sekaligus di tengah ombak, tanpa sekali pun menjatuhkan salah satunya."],
+    ["Kerja sama yang solid adalah rahasia di balik setiap karya besar yang tercipta.","Beberapa orang bekerja bersama membangun satu katedral, masing-masing dengan keahliannya."],
+    ["Jangan biarkan ketakutan akan kekurangan mengubahmu menjadi seseorang yang kaku dan enggan berbagi.","Memeluk erat semua yang dimiliki sampai tak ada tangan tersisa untuk menerima."],
+    ["Saat kamu merasa kedinginan di tengah kesulitan, kepedulian sekecil apa pun bisa terasa begitu luar biasa.","Dua orang berjalan di salju melewati jendela yang hangat, sampai ada yang mengulurkan sedikit kebaikan."],
+    ["Hidup adalah lingkaran tentang memberi dan menerima dengan hati yang lapang.","Seseorang membagi apa yang dimilikinya, lalu belajar menerima dengan sama lapangnya."],
+    ["Bersabarlah melihat proses buah yang manis butuh waktu untuk matang di pohonnya.","Berdiri di depan kebun yang lama dirawat, menunggu buahnya matang."],
+    ["Dedikasi dan ketekunan dalam hal-hal kecil adalah kunci kesempurnaan sebuah karya.","Mengukir satu demi satu dengan telaten, sampai karyanya bisa bicara sendiri."],
+    ["Kemandirian dan rasa aman adalah buah manis dari kerja keras yang kau bangun sendiri.","Berjalan sendirian di kebun anggur yang ditanam dengan tangannya sendiri."],
+    ["Warisan terbaik bukanlah harta, melahirkan fondasi kehidupan yang kokoh untuk masa depan.","Tiga generasi di satu halaman, dan fondasi yang diwariskan bukan berupa harta."],
+    ["Kedekatan dengan alam mengingatkan kita untuk menghargai tubuh dan bumi sebagai rumah.","Seseorang muda menatap sekeping koin di ladang seolah itu benda suci."],
+    ["Kesabaran dan komitmen baja adalah andalan utama untuk menuntaskan setiap tanggung jawab.","Menunggang pelan tapi tak pernah berhenti, menuntaskan apa yang pernah dijanjikan."],
+    ["Menjadi sosok yang penuh perhatian tidak menghalangimu untuk menjadi cerdas, strategis, dan sukses dalam berbisnis.","Dapur yang hangat dan catatan yang rapi, seseorang yang bisa menyayangi sekaligus menghitung."],
+    ["Puncak dari kesuksesan bukan tentang seberapa banyak yang kau miliki, melainkan seberapa banyak orang yang bisa hidup lebih baik karena kehadiranmu.","Seseorang yang berada, tapi yang paling dikenang adalah banyaknya orang yang hidup lebih baik karenanya."]]
+  ];
+  M.forEach(function(su,si){su.forEach(function(p,ri){
+    C.push([SUITS[si][1],RANKS[ri]+" of "+SUITS[si][0],p[0],p[1]]);
+    ART.push(ri>9?CROWN+"<g transform='translate(10 14) scale(.8)'>"+SUITS[si][2]+"</g>":SUITS[si][2]);
+  })});
+  var KEY="kartu-hari-ini-v1", d=new Date();
+  var day=d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+  var seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+  var ix=((Math.imul(seed,2654435761)>>>0)>>>8)%C.length, c=C[ix];
+  var card=document.getElementById("card"), read=document.getElementById("read");
+  document.getElementById("num").textContent=c[0];
+  document.getElementById("art").innerHTML="<svg viewBox='0 0 100 100' aria-hidden='true'><g fill='none' stroke='var(--gold)' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'>"+ART[ix]+"</g></svg>";
+  document.getElementById("name").textContent=c[1];
+  document.getElementById("pesan").textContent=c[2];
+  document.getElementById("ide").textContent=c[3];
+  document.getElementById("date").textContent=d.toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long"});
+  function open(on,persist){
+    card.classList.toggle("on",on);read.classList.toggle("on",on);
+    card.setAttribute("aria-pressed",on?"true":"false");
+    if(persist){try{localStorage.setItem(KEY,JSON.stringify({day:day,on:on}))}catch(e){}}
+  }
+  card.addEventListener("click",function(){open(!card.classList.contains("on"),true)});
+  try{var s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&s.day===day&&s.on)open(true,false)}catch(e){}
+})();
+</script>
+</body>
+</html>
