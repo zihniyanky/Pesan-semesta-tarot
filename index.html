@@ -26,7 +26,7 @@ html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   display:flex;align-items:center;justify-content:center;padding:28px 20px;overflow-x:hidden}
 .wrap{width:100%;max-width:720px;display:flex;align-items:center;gap:44px}
-.card{flex:none;width:190px;aspect-ratio:2/3;perspective:1100px;background:none;border:0;padding:0;cursor:pointer;color:inherit;font:inherit}
+.card{flex:none;width:190px;aspect-ratio:5/7;perspective:1100px;background:none;border:0;padding:0;cursor:pointer;color:inherit;font:inherit}
 .card:focus-visible{outline:3px solid var(--glow);outline-offset:6px;border-radius:16px}
 .inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.2,.7,.2,1)}
 .card.on .inner{transform:rotateY(180deg)}
@@ -42,6 +42,13 @@ body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:
 .art{position:relative;z-index:1;width:80%;flex:1;display:flex;align-items:center;min-height:0}
 .art svg{width:100%;height:auto;max-height:100%}
 .art .a{fill:var(--glow);fill-opacity:.4}
+.back.pic{background-size:cover;background-position:center;box-shadow:0 0 36px -6px var(--gold)}
+.back.pic svg{display:none}
+.front.pic::after{display:none}
+.front.pic .art{position:absolute;inset:0;width:auto;z-index:0}
+.front.pic .art img{width:100%;height:100%;object-fit:cover;display:block}
+.front.pic .art::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.45),transparent 28%,transparent 62%,rgba(0,0,0,.7))}
+.front.pic .num,.front.pic .name{color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.6)}
 .name{font-family:"Instrument Serif",Georgia,serif;font-size:20px;line-height:1.15}
 .read{flex:1;min-width:0;min-height:260px;display:flex;flex-direction:column;justify-content:center;gap:18px}
 .hint{margin:0;font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-size:26px;color:var(--soft)}
@@ -204,6 +211,13 @@ body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:
     C.push([SUITS[si][1],RANKS[ri]+" of "+SUITS[si][0],p[0],p[1]]);
     ART.push(ri>9?CROWN+"<g transform='translate(10 14) scale(.8)'>"+SUITS[si][2]+"</g>":SUITS[si][2]);
   })});
+  /* Gambar kartu sendiri: isi satu baris per kartu, "Nama Kartu":"alamat/gambar.webp".
+     Kartu tanpa gambar tetap memakai ilustrasi garis. Rasio terbaik 5:7 (mis. 600x840 px). */
+  var IMG={
+    // "The Fool":"gambar/the-fool.webp",
+    // "Ace of Cups":"gambar/ace-of-cups.webp",
+  };
+  var BACK="gambar/back_card.webp"; /* punggung kartu; kalau gagal dimuat, dipakai motif bawaan */
   var KEY="kartu-hari-ini-v1", d=new Date();
   var day=d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
   var seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
@@ -211,6 +225,9 @@ body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:
   var card=document.getElementById("card"), read=document.getElementById("read");
   document.getElementById("num").textContent=c[0];
   document.getElementById("art").innerHTML="<svg viewBox='0 0 100 100' aria-hidden='true'><g fill='none' stroke='var(--gold)' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'>"+ART[ix]+"</g></svg>";
+  var pic=IMG[c[1]];
+  if(pic){var im=new Image();im.alt=c[1];im.onload=function(){var a=document.getElementById("art");a.innerHTML="";a.appendChild(im);document.querySelector(".front").classList.add("pic")};im.src=pic}
+  var bi=new Image();bi.onload=function(){var b=document.querySelector(".back");b.style.backgroundImage="url('"+BACK+"')";b.classList.add("pic")};bi.src=BACK;
   document.getElementById("name").textContent=c[1];
   document.getElementById("pesan").textContent=c[2];
   document.getElementById("ide").textContent=c[3];
